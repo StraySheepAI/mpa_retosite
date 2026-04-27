@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reto de Iniciación — Magia para Atrevidos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep:#0d0618;--gold:#967B45;--gold-light:#c4a265;--gold-pale:#e8d5a3;
+      --fucsia:#E336C3;--fucsia-dim:#a0237f;--violet:#3d1a6e;
+      --text:#e8dff5;--text-dim:#9b8fb5;
+      /* colores por desafío */
+      --evigela:#C9A84C;     /* dorado amarillo */
+      --lude:#8B6340;        /* bronce */
+      --transmuta:#7B2FBE;   /* violeta */
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:var(--bg-deep);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;}
+    #cosmos{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+    /* OVERLAY DE TRANSICIÓN */
+    #transition-overlay{
+      position:fixed;inset:0;z-index:999;
+      pointer-events:none;opacity:0;
+      background:radial-gradient(circle at center, #C9A84C 0%, #0d0618 70%);
+      transition:none;
+    }
+
+    /* RIPPLE */
+    #ripple-canvas{position:fixed;inset:0;z-index:998;pointer-events:none;}
+    .stage{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:60px 24px 100px;}
+
+    /* HEADER */
+    .header{text-align:center;margin-bottom:64px;opacity:0;animation:fadeUp 1s ease 0.3s forwards;}
+    .eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:20px;}
+    .main-title{font-family:'Cinzel Decorative',serif;font-size:clamp(22px,5vw,38px);font-weight:700;background:linear-gradient(135deg,var(--gold-pale),var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.25;margin-bottom:20px;}
+    .divider{display:flex;align-items:center;gap:16px;margin:24px 0;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold) 50%,transparent);}
+    .div-glyph{font-family:'Cinzel Decorative',serif;font-size:18px;color:var(--gold);}
+    .header-sub{font-family:'Cinzel',serif;font-size:13px;color:var(--text-dim);letter-spacing:1.5px;}
+    .header-intro{margin-top:28px;font-family:'Cinzel',serif;font-size:13px;color:var(--text-dim);line-height:2.2;letter-spacing:.5px;}
+    .header-intro-sub{margin-top:14px;font-size:12px;color:var(--text-dim);font-style:italic;}
+
+    /* PROGRESS */
+    .pips{display:flex;justify-content:center;gap:12px;margin-bottom:52px;opacity:0;animation:fadeUp 1s ease .6s forwards;}
+    .pip{width:8px;height:8px;border-radius:50%;border:1px solid rgba(150,123,69,.4);background:transparent;transition:all .5s;}
+    .pip.done{background:var(--gold);border-color:var(--gold);box-shadow:0 0 8px var(--gold);}
+
+    /* CARD */
+    .card{background:linear-gradient(135deg,rgba(61,26,110,.25),rgba(13,6,24,.6));border:1px solid rgba(150,123,69,.25);border-radius:4px;padding:40px 40px 36px;position:relative;transition:border-color .4s,box-shadow .4s;}
+    .card:hover{border-color:rgba(150,123,69,.45);}
+    .card::before,.card::after{content:'';position:absolute;width:16px;height:16px;border-color:var(--gold);border-style:solid;opacity:.3;}
+    .card::before{top:12px;left:12px;border-width:1px 0 0 1px;}
+    .card::after{bottom:12px;right:12px;border-width:0 1px 1px 0;}
+    .card.solved{border-color:rgba(150,123,69,.55);animation:pulseGold 2.5s ease infinite;}
+
+    /* LOCKED */
+    .locked{display:none;margin-top:32px;}
+    .locked.open{display:block;animation:fadeUp .9s ease forwards;}
+
+    /* UNLOCK BANNER */
+    .unlock-banner{text-align:center;padding:32px 24px;margin-bottom:32px;border:1px solid rgba(227,54,195,.25);border-radius:4px;background:linear-gradient(135deg,rgba(227,54,195,.08),rgba(13,6,24,.6));}
+    .unlock-eye{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--fucsia);margin-bottom:12px;}
+    .unlock-title{font-family:'Cinzel Decorative',serif;font-size:clamp(16px,3vw,22px);background:linear-gradient(135deg,var(--gold-pale),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;}
+    .unlock-sub{font-size:12px;color:var(--text-dim);font-style:italic;line-height:1.7;}
+
+    /* SECTION SEP */
+    .sep{display:flex;align-items:center;gap:16px;margin:28px 0;}
+    .sep::before,.sep::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(150,123,69,.3) 50%,transparent);}
+    .sep span{font-size:11px;color:var(--text-dim);letter-spacing:2px;white-space:nowrap;}
+
+    /* CHALLENGE PARTS */
+    .ch-num{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--fucsia);margin-bottom:12px;}
+    .ch-word{font-family:'Cinzel Decorative',serif;font-size:clamp(18px,3.5vw,26px);background:linear-gradient(135deg,var(--gold-pale),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:24px;}
+    .ch-body{font-size:14px;color:var(--text);line-height:1.9;}
+    .badge{display:none;font-size:10px;letter-spacing:2px;color:#4caf89;border:1px solid rgba(76,175,137,.4);border-radius:2px;padding:3px 10px;margin-left:10px;vertical-align:middle;}
+
+    /* GIF */
+    .gif-block{text-align:center;margin:28px 0;}
+    .gif-block img{max-width:100%;border:1px solid rgba(150,123,69,.2);border-radius:3px;}
+    .gif-cap{font-size:11px;color:var(--text-dim);letter-spacing:1.5px;margin-top:12px;font-style:italic;text-transform:uppercase;}
+
+    /* WALLY */
+    .wally-wrap{position:relative;margin:24px 0;cursor:crosshair;}
+    .wally-wrap img{width:100%;display:block;border-radius:3px;border:1px solid rgba(150,123,69,.2);}
+    .arca-zone{position:absolute;bottom:5%;left:5%;width:22%;height:28%;cursor:pointer;border-radius:4px;}
+    .wally-hint{font-size:12px;color:var(--text-dim);text-align:center;margin-top:8px;font-style:italic;}
+    .arca-msg{display:none;margin-top:20px;padding:20px 24px;background:rgba(227,54,195,.08);border:1px solid rgba(227,54,195,.25);border-radius:3px;font-family:'Cinzel',serif;font-size:13px;line-height:1.9;color:var(--text);text-align:center;}
+    .arca-msg.show{display:block;animation:fadeUp .6s ease forwards;}
+
+    /* POEM */
+    .poem-block{background:rgba(61,26,110,.15);border-left:2px solid rgba(227,54,195,.4);padding:24px 28px;margin:20px 0;border-radius:0 3px 3px 0;}
+    .poem-line{font-family:'Cinzel',serif;font-size:14px;line-height:2.4;color:var(--text);}
+    .fl{color:var(--fucsia);font-weight:600;font-size:16px;}
+
+    /* POEM WRAP hidden */
+    #poem-wrap{display:none;}
+
+    /* INPUT */
+    .input-row{display:flex;gap:10px;margin-top:24px;}
+    .answer-input{flex:1;background:rgba(13,6,24,.8);border:1px solid rgba(150,123,69,.3);border-radius:3px;padding:12px 16px;font-family:'Cinzel',serif;font-size:14px;letter-spacing:2px;color:var(--gold-pale);text-transform:uppercase;outline:none;transition:border-color .3s;}
+    .answer-input::placeholder{color:var(--text-dim);text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-size:13px;}
+    .answer-input:focus{border-color:var(--gold);}
+    .answer-input.correct{border-color:#4caf89;color:#4caf89;}
+    .answer-input.wrong{border-color:#c0392b;animation:shake .4s;}
+    .btn-go{background:linear-gradient(135deg,var(--violet),rgba(61,26,110,.6));border:1px solid rgba(150,123,69,.4);border-radius:3px;padding:12px 20px;font-family:'Cinzel',serif;font-size:14px;color:var(--gold-light);cursor:pointer;transition:all .3s;}
+    .btn-go:hover{border-color:var(--fucsia-dim);color:var(--fucsia);}
+    .fb{font-size:12px;margin-top:10px;min-height:18px;letter-spacing:.5px;}
+    .fb.ok{color:#4caf89;}
+    .fb.err{color:#e57373;}
+
+    /* REVELATION */
+    .rev{display:none;margin-top:24px;padding:24px 28px;background:linear-gradient(135deg,rgba(61,26,110,.3),rgba(13,6,24,.7));border:1px solid rgba(150,123,69,.35);border-radius:3px;}
+    .rev.show{display:block;animation:fadeUp .7s ease forwards;}
+    .rev-word{font-family:'Cinzel Decorative',serif;font-size:17px;background:linear-gradient(135deg,var(--gold-pale),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px;}
+    .rev p{font-size:13px;color:var(--text-dim);line-height:1.9;}
+
+    /* HINT */
+    .hint-tog{font-size:11px;color:var(--text-dim);cursor:pointer;letter-spacing:1px;text-decoration:underline;text-decoration-color:rgba(150,123,69,.3);margin-top:16px;display:inline-block;transition:color .3s;}
+    .hint-tog:hover{color:var(--gold-light);}
+    .hint-box{margin-top:12px;background:rgba(61,26,110,.2);border:1px solid rgba(227,54,195,.15);border-radius:3px;padding:14px 18px;font-size:12px;color:var(--text-dim);line-height:1.7;display:none;}
+    .hint-box.open{display:block;}
+
+    /* FINAL */
+    #lema-section{text-align:center;padding:60px 0;opacity:0;pointer-events:none;transition:opacity 1s;margin-top:40px;}
+    #lema-section.revealed{opacity:1;pointer-events:all;}
+    .lema-label{font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--fucsia);margin-bottom:24px;}
+    .lema-words{display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:32px;}
+    .lema-word{font-family:'Cinzel Decorative',serif;font-size:clamp(14px,3.5vw,24px);background:linear-gradient(135deg,var(--gold-pale),var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;transform:scale(.8);transition:all .6s cubic-bezier(.34,1.56,.64,1);}
+    .lema-word.show{opacity:1;transform:scale(1);}
+    .lema-sep{color:var(--fucsia);font-size:20px;opacity:.6;}
+    .portal-msg{font-family:'Cinzel',serif;font-size:13px;color:var(--text-dim);letter-spacing:1px;margin-bottom:36px;line-height:2;}
+    .btn-portal{display:inline-block;background:linear-gradient(135deg,rgba(227,54,195,.2),rgba(61,26,110,.6));border:1px solid var(--fucsia-dim);border-radius:3px;padding:16px 40px;font-family:'Cinzel',serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--fucsia);text-decoration:none;transition:all .3s;}
+    .btn-portal:hover{background:linear-gradient(135deg,rgba(227,54,195,.4),rgba(61,26,110,.9));box-shadow:0 0 30px rgba(227,54,195,.3);}
+
+    /* ANIMATIONS */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes logoExplode{
+      0%  {opacity:0;transform:scale(0.2) rotate(-15deg);filter:brightness(3) blur(8px);}
+      60% {opacity:1;transform:scale(1.15) rotate(3deg);filter:brightness(1.5) blur(0);}
+      80% {transform:scale(0.95) rotate(-1deg);filter:brightness(1);}
+      100%{opacity:1;transform:scale(1) rotate(0deg);filter:brightness(1);}
+    }
+    @keyframes floatLogo{
+      0%,100%{transform:translateY(0px);filter:drop-shadow(0 0 18px rgba(227,54,195,.7)) drop-shadow(0 0 40px rgba(123,47,190,.5)) drop-shadow(0 0 8px rgba(201,168,76,.4));}
+      50%{transform:translateY(-14px);filter:drop-shadow(0 0 28px rgba(227,54,195,.9)) drop-shadow(0 0 60px rgba(123,47,190,.7)) drop-shadow(0 0 14px rgba(201,168,76,.6));}
+    }
+    @keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-6px);}40%,80%{transform:translateX(6px);}}
+    @keyframes pulseGold{0%,100%{box-shadow:0 0 0 rgba(150,123,69,0);}50%{box-shadow:0 0 20px rgba(150,123,69,.2);}}
+
+    .opcion-btn{display:block;padding:14px 20px;background:linear-gradient(135deg,rgba(61,26,110,.3),rgba(13,6,24,.7));border:1px solid rgba(150,123,69,.3);border-radius:3px;font-family:'Cinzel',serif;font-size:13px;letter-spacing:1.5px;color:var(--gold-light);text-decoration:none;transition:all .3s;text-align:center;}
+    .opcion-btn:hover{border-color:var(--fucsia-dim);color:var(--fucsia);background:linear-gradient(135deg,rgba(227,54,195,.1),rgba(61,26,110,.5));}
+    .opcion-btn.elegida{border-color:var(--fucsia);color:var(--fucsia);}
+
+    @media(max-width:500px){.card{padding:28px 20px 24px;}.input-row{flex-direction:column;}.btn-go{width:100%;}}
+  </style>
+</head>
+<body>
+
+<canvas id="ripple-canvas"></canvas>
+<div id="transition-overlay"></div>
+<canvas id="cosmos"></canvas>
+
+<div class="stage">
+
+  <!-- HEADER -->
+  <header class="header">
+    <p class="eyebrow">Universo MPA</p>
+    <h1 class="main-title">Reto de Iniciación</h1>
+    <div class="divider"><span class="div-glyph">✦</span></div>
+    <p class="header-sub">Tres señales. Una llave. Un umbral.</p>
+    <div class="header-intro">
+      No todo el que llega entra.<br>
+      No todo el que mira ve.<br>
+      No todo el que responde entiende.
+    </div>
+    <div class="header-intro-sub">
+      Este no es un formulario.<br>
+      Es una prueba de lectura.
+    </div>
+  </header>
+
+  <!-- PROGRESS -->
+  <div class="pips">
+    <div class="pip" id="pip-0"></div>
+    <div class="pip" id="pip-1"></div>
+    <div class="pip" id="pip-2"></div>
+  </div>
+
+  <!-- ══ DESAFÍO I ══ -->
+  <div class="card" id="ch-0">
+    <div class="ch-num">Desafío I</div>
+    <div class="ch-word" style="background:linear-gradient(135deg,#e8d5a3,#C9A84C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">El Reflejo <span class="badge" id="badge-0" style="-webkit-text-fill-color:#C9A84C;color:#C9A84C;border-color:rgba(201,168,76,.4);">✓</span></div>
+    <div class="ch-body">
+      <!-- AUDIO — reemplazá src con tu archivo en Vercel, ej: /audio-espejo.mp3 -->
+      <div style="margin-bottom:28px;">
+        <p style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">✦ Poné play — cerrá los ojos — escuchá</p>
+        <audio controls style="width:100%;filter:invert(1) hue-rotate(200deg) brightness(.8);">
+          <source src="/audio-espejo.mp3" type="audio/mpeg">
+          <source src="/audio-espejo.ogg" type="audio/ogg">
+        </audio>
+      </div>
+
+      <p>El espejo no guarda secretos.<br>
+      Los devuelve torcidos, pulidos o disfrazados.<br>
+      Depende de quién se atreva a mirar.</p>
+      <br>
+      <div style="text-align:center;margin:28px 0;">
+        <img src="https://i.ibb.co/1GpC6jqT/l-OGO-Y-ELEMENTOS-CLAVES-1.gif" alt="El espejo"
+          style="max-width:100%;width:100%;border:1px solid rgba(150,123,69,.2);border-radius:3px;" />
+      </div>
+      <p>No busques una imagen perfecta.<br>
+      Eso es decoración del ego.<br>
+      Buscá la señal que quedó ahí, esperando que dejaras de actuar.</p>
+      <br>
+      <p style="font-size:13px;color:var(--text-dim);font-style:italic;">Hay algo que el reflejo dice una sola vez.<br>
+      Y si parpadeás desde la costumbre, se te escapa.</p>
+    </div>
+    <span class="hint-tog" onclick="mostrarPista()">→ una pista</span>
+
+    <!-- PISTA 1: papiro -->
+    <div id="pista-1" style="display:none; margin-top:12px;">
+      <div style="text-align:center;">
+        <img src="https://i.ibb.co/zHbGQkKj/Copy-of-D-1080-x-1350-px-Instagram-Post-45-Instagram-Post-6-edited.png"
+             alt="El pergamino"
+             style="max-width:100%;border-radius:3px;border:1px solid rgba(150,123,69,.2);" />
+      </div>
+      <div style="text-align:center;margin-top:16px;">
+        <span class="hint-tog" onclick="mostrarPista2()">→ seguir necesitando ayuda</span>
+      </div>
+    </div>
+
+    <!-- PISTA 2: texto -->
+    <div id="pista-2" style="display:none; margin-top:16px; background:rgba(61,26,110,.2); border:1px solid rgba(227,54,195,.15); border-radius:3px; padding:16px 20px; font-size:13px; color:var(--text-dim); line-height:1.9;">
+      Las palabras de este universo no siempre hablan en los idiomas que conocés.<br>
+      Pero el espejo no miente — aunque hable en otro registro.<br><br>
+      Mirá de nuevo. Hay un instante, entre todo el ruido visual, donde algo aparece.<br>
+      Un segundo basta para despertar.<br>
+      Siempre bastó.
+      <div style="text-align:center;margin-top:16px;">
+        <span class="hint-tog" onclick="mostrarPista3()">→ una última pista</span>
+      </div>
+    </div>
+
+    <!-- PISTA 3: múltiple choice -->
+    <div id="pista-3" style="display:none; margin-top:16px;">
+      <div style="background:rgba(61,26,110,.2); border:1px solid rgba(227,54,195,.15); border-radius:3px; padding:16px 20px; font-size:13px; color:var(--text-dim); line-height:1.9; margin-bottom:16px;">
+        Todas suenan posibles en el universo MPA.<br>
+        Pero solo una significa despertar, estar consciente, estar atento.<br>
+        <span style="font-style:italic;">Elegí la que resuena. La que habla de abrir los ojos.</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="opcion-btn" onclick="elegirRespuesta(this, false)">✦ POTENTIA</button>
+        <button class="opcion-btn" onclick="elegirRespuesta(this, true)">✦ EVIGELA</button>
+        <button class="opcion-btn" onclick="elegirRespuesta(this, false)">✦ LUMINIS</button>
+      </div>
+      <div id="fb-eleccion" style="font-size:12px;margin-top:10px;min-height:18px;"></div>
+    </div>
+    <div class="input-row">
+      <input class="answer-input" id="inp-0" type="text" placeholder="lo que viste cuando dejaste de mirarte..." autocomplete="off" spellcheck="false" style="border-color:rgba(201,168,76,.4);color:#C9A84C;" />
+      <button class="btn-go" onclick="check(0)" style="border-color:rgba(201,168,76,.4);color:#C9A84C;">→</button>
+    </div>
+    <div class="fb" id="fb-0"></div>
+    <div class="rev" id="rev-0">
+      <div class="rev-word">EVIGELA — Despierta.</div>
+      <p>Del latín <em>vigilare</em>: estar despierto, estar alerta, ser consciente.<br><br>
+      En este mundo, nada es casualidad.<br>
+      Evigela no es solo un nombre. Es una llave, una revelación.<br>
+      Los antiguos sabían que la realidad no se trata solo de ver,<br>
+      sino de aprender a observar. No solo de escuchar,<br>
+      sino de entender el mensaje oculto.<br><br>
+      Sin darte cuenta, ya empezaste a despertar.</p>
+    </div>
+  </div>
+
+  <!-- ══ DESAFÍO II — LOCKED ══ -->
+  <div class="locked" id="wrap-1">
+    <div class="unlock-banner">
+      <div class="unlock-eye">Primera marca activada</div>
+      <div class="unlock-title">El Reflejo cedió.</div>
+      <div class="unlock-sub">Pero ver no es suficiente.<br>Ahora tenés que aprender a leer lo que no está escrito.</div>
+    </div>
+
+    <div class="card" id="ch-1">
+      <div class="ch-num">Desafío II</div>
+      <div class="ch-word" style="background:linear-gradient(135deg,#c49a6c,#8B6340);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">La Arquitectura Oculta <span class="badge" id="badge-1" style="-webkit-text-fill-color:#8B6340;color:#8B6340;border-color:rgba(139,99,64,.4);">✓</span></div>
+      <div class="ch-body">
+
+        <div class="gif-block">
+          <img src="https://i.ibb.co/DfHjcw4b/GIF-image-4366-B030-F7-0.gif" alt="Mundo Evigela"/>
+          <div class="gif-cap">Mundo Evigela · donde el olvido y la memoria danzan</div>
+        </div>
+
+        <p>En cada mundo de MPA existen artefactos sellados.<br>
+        Reliquias que resguardan secretos y energías ocultas.</p>
+        <br>
+        <p>Se llaman <strong style="color:var(--gold-light)">Arcas Potentia</strong>.<br>
+        No se encuentran por azar.<br>
+        Te encuentran a vos cuando estás preparado.</p>
+
+        <div class="sep"><span>✦ tu prueba ✦</span></div>
+
+        <p style="font-size:13px;color:var(--text-dim);font-style:italic;margin-bottom:20px;">
+          Hay un Arca escondida entre los personajes de este mundo.<br>
+          No todos la ven. Encontrala y hacé click sobre ella.
+        </p>
+
+        <!-- IMAGEN WALLY -->
+        <div class="wally-wrap">
+          <img src="https://i.ibb.co/1tCyPhMS/MUNDO-EVIGILA-ARCApng.png" alt="Encontrá el Arca"/>
+          <div class="arca-zone" id="arca-zone" onclick="foundArca()"></div>
+        </div>
+        <p class="wally-hint">Mirá bien. Hacé click cuando la encuentres.</p>
+
+        <div class="arca-msg" id="arca-msg">
+          <div style="text-align:center;margin-bottom:16px;">
+            <img src="https://i.ibb.co/99kMwHLv/ARCACONLUZ.png" alt="Arca Potentia"
+                 style="max-width:280px;width:100%;border-radius:3px;" />
+          </div>
+          ✦ La encontraste.<br><br>
+          <span style="font-size:12px;color:var(--text-dim);font-style:italic;">
+            Las Arcas Potentia no se abren con fuerza.<br>
+            Se abren con la palabra correcta.<br>
+            Y esa palabra no está en la imagen.<br>
+            Está en el poema que aparece a continuación.
+          </span>
+        </div>
+
+        <!-- POEMA — aparece tras encontrar el Arca -->
+        <div id="poem-wrap">
+          <div class="sep"><span>✦ el poema ✦</span></div>
+          <p style="font-size:14px;color:var(--text);line-height:1.9;margin-bottom:16px;">
+            No todo poema dice lo que parece decir.<br>
+            Algunos no se leen: se desmontan.<br><br>
+            Las palabras son fachada.<br>
+            La forma es la cerradura.
+          </p>
+          <div class="poem-block">
+            <div class="poem-line"><span class="fl">L</span>o que no se nombra también habita.</div>
+            <div class="poem-line"><span class="fl">U</span>n umbral no se atraviesa, se reconoce.</div>
+            <div class="poem-line"><span class="fl">D</span>onde otros ven palabras, vos ves claves.</div>
+            <div class="poem-line"><span class="fl">E</span>l que llega hasta aquí ya sabe.</div>
+          </div>
+          <p style="font-size:13px;color:var(--text-dim);font-style:italic;margin-top:16px;">
+            El poema guarda una palabra.<br>
+            No está escrita. Está construida.<br><br>
+            Y sí: si la buscás como lector común, perdiste.<br>
+            Acá no se lee bonito. Acá se lee con colmillos.
+          </p>
+          <span class="hint-tog" onclick="toggleHint('h1')">→ una pista</span>
+          <div class="hint-box" id="h1">
+            Es lo que hacen los niños sin que nadie se los pida.<br>
+            Y lo que los adultos olvidan que sabían hacer.<br>
+            No es complicado. Es lo opuesto a complicado.<br>
+            Es lo que estás haciendo desde que entraste acá<br>
+            — solo que en su forma más antigua.
+          </div>
+          <div class="input-row">
+            <input class="answer-input" id="inp-1" type="text" placeholder="la palabra que sostiene la forma..." autocomplete="off" spellcheck="false" style="border-color:rgba(139,99,64,.5);color:#8B6340;"/>
+            <button class="btn-go" onclick="check(1)" style="border-color:rgba(139,99,64,.5);color:#8B6340;">→</button>
+          </div>
+          <div class="fb" id="fb-1"></div>
+          <div class="rev" id="rev-1">
+            <div class="rev-word">LUDE — Juega.</div>
+            <p>Del latín <em>ludere</em>: jugar, experimentar, atreverse sin miedo a fallar.<br><br>
+            En MPA, el juego no es trivial.<br>
+            Es el acto más serio que existe.<br>
+            Porque quien juega de verdad<br>
+            sabe que las reglas son una invitación, no una jaula.<br><br>
+            Llegaste hasta acá jugando.<br>
+            Y eso ya dice todo.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DESAFÍO III — LOCKED ══ -->
+  <div class="locked" id="wrap-2">
+    <div class="unlock-banner" style="margin-top:4px;">
+      <div class="unlock-eye">Segunda marca activada</div>
+      <div class="unlock-title">La arquitectura respondió.</div>
+      <div class="unlock-sub">
+        Viste lo que otros pasan por alto.<br>
+        Queda una última prueba.<br>
+        Esta vez, el portal no está aquí adentro.
+      </div>
+    </div>
+
+    <div class="card" id="ch-2">
+      <div class="ch-num">Desafío III</div>
+      <div class="ch-word" style="background:linear-gradient(135deg,#b07fe0,#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Lo que Queda <span class="badge" id="badge-2" style="-webkit-text-fill-color:#7B2FBE;color:#7B2FBE;border-color:rgba(123,47,190,.4);">✓</span></div>
+      <div class="ch-body">
+
+        <p>Hay palabras que no se leen.<br>
+        Se escuchan.<br>
+        Y cuando las escuchás de verdad,<br>
+        algo en vos ya sabe a dónde ir.</p>
+
+        <div class="sep"><span>✦ escuchá ✦</span></div>
+
+        <!-- SPOTIFY EMBED -->
+        <div style="margin:24px 0;">
+          <iframe style="border-radius:8px;border:1px solid rgba(150,123,69,.25);"
+            src="https://open.spotify.com/embed/track/5lS44cNadDa6vtGqGJ7FOt?utm_source=generator&theme=0"
+            width="100%" height="152" frameborder="0"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"></iframe>
+        </div>
+
+        <p style="font-size:13px;color:var(--text-dim);font-style:italic;">
+          La canción es la llave.<br>
+          El video es la puerta.<br><br>
+          Cuando la hayas escuchado,<br>
+          algo en el título te va a llamar.<br>
+          Seguí ese llamado.
+        </p>
+
+        <div class="sep"><span>✦ ¿qué escuchaste? ✦</span></div>
+
+        <!-- 3 OPCIONES -->
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:20px;">
+          Elegí lo que resonó en vos. Las tres puertas llevan al mismo canal.<br>
+          Pero solo una nombra lo que buscás.
+        </p>
+
+        <div id="opciones" style="display:flex;flex-direction:column;gap:12px;">
+          <a href="https://www.youtube.com/watch?v=K2f8YM0W1G0&list=PLjc_aaH4omffD-q0tJW1DSyFJHA-JECRv&index=2"
+             target="_blank" class="opcion-btn" onclick="elegida(this)">
+            ✦ Ojos Ancestrales
+          </a>
+          <a href="https://www.youtube.com/@RCDopazo"
+             target="_blank" class="opcion-btn" onclick="elegida(this)">
+            ✦ El juego que transforma
+          </a>
+          <a href="https://www.youtube.com/@RCDopazo"
+             target="_blank" class="opcion-btn" onclick="elegida(this)">
+            ✦ La magia que ya estaba en mí
+          </a>
+        </div>
+
+        <!-- MENSAJE TRAS ELEGIR -->
+        <div id="post-eleccion" style="display:none;margin-top:24px;">
+          <p style="font-size:13px;color:var(--text-dim);font-style:italic;line-height:1.9;">
+            Bien.<br>
+            Ahora estás en el canal.<br>
+            Buscá el video <strong style="color:var(--gold-light)">Ancient Eyes</strong>.<br>
+            Mirá con atención lo que está fijado.<br>
+            Hay una palabra que sobrevive a todo el ruido.<br>
+            Esa es la que necesitás.
+          </p>
+        </div>
+
+        <div style="margin-top:32px;">
+          <span class="hint-tog" onclick="toggleHint('h2')">→ una pista</span>
+          <div class="hint-box" id="h2">
+            En el video Ancient Eyes de R.C. Dopazo<br>
+            hay un comentario fijado por la autora.<br>
+            Leelo con atención. La palabra está ahí.
+          </div>
+        </div>
+
+        <div class="input-row" style="margin-top:20px;">
+          <input class="answer-input" id="inp-2" type="text" placeholder="la palabra que sobrevivió..." autocomplete="off" spellcheck="false" style="border-color:rgba(123,47,190,.5);color:#7B2FBE;"/>
+          <button class="btn-go" onclick="check(2)" style="border-color:rgba(123,47,190,.5);color:#b07fe0;">→</button>
+        </div>
+        <div class="fb" id="fb-2"></div>
+
+        <div class="rev" id="rev-2">
+          <div class="rev-word">TRANSMUTA — Transforma.</div>
+          <p>Del latín <em>transmutare</em>: cambiar de forma, de naturaleza, de esencia.<br><br>
+          En alquimia, transmutar no es destruir.<br>
+          Es reconocer el potencial oculto en lo que ya existe<br>
+          y darle una nueva forma.<br><br>
+          Llegaste hasta acá.<br>
+          Eso no es casualidad.<br>
+          Eso es transmutación en acto.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CIERRE ══ -->
+  <div id="lema-section">
+    <div class="lema-label">Marca final desbloqueada</div>
+
+    <!-- LOGO con explosión -->
+    <div style="margin-bottom:32px;">
+      <img src="https://i.ibb.co/9BY04hz/ULTIMO.png" alt="Magia para Atrevidos"
+           style="max-width:220px;width:65%;animation:floatLogo 3s ease-in-out infinite;opacity:0.95;" />
+    </div>
+
+    <div class="lema-words">
+      <span class="lema-word" id="lw-0">EVIGELA</span>
+      <span class="lema-sep">·</span>
+      <span class="lema-word" id="lw-1">LUDE</span>
+      <span class="lema-sep">·</span>
+      <span class="lema-word" id="lw-2">TRANSMUTA</span>
+    </div>
+    <p class="portal-msg">
+      El umbral reconoce tu paso.<br><br>
+      No porque hayas respondido.<br>
+      Sino porque aprendiste a mirar distinto.<br><br>
+      Atravesaste el Reflejo.<br>
+      Leíste la Forma.<br>
+      Encontraste lo que Queda.<br><br>
+      La iniciación no te da poder.<br>
+      Te recuerda que ya estabas jugando,<br>
+      aunque no supieras las reglas.<br><br>
+      <span style="font-family:'Cinzel Decorative',serif;font-size:11px;letter-spacing:3px;color:var(--fucsia);">Bienvenido al punto de no retorno.</span><br>
+      <span style="font-size:13px;color:var(--text);font-family:'Cinzel',serif;line-height:2;">No todo el mundo llega hasta acá.<br>Vos sí.<br>Eso no es suerte —<br>es lo que hace la magia con los verdaderos atrevidos.</span>
+    </p>
+
+    <!-- MÚSICA FINAL — autoplay on first interaction -->
+    <div style="margin:32px 0 40px;">
+      <p style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;">✦ Esto es para vos</p>
+      <iframe id="spotify-final" style="border-radius:8px;border:1px solid rgba(123,47,190,.4);"
+        src="https://open.spotify.com/embed/track/5Otw3CJ2Hd4cA3aFVK1S7n?utm_source=generator&theme=0&autoplay=1"
+        width="100%" height="152" frameborder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"></iframe>
+    </div>
+
+    <a href="https://bienvenida-universo.magiaparaatrevidos.com" class="btn-portal" id="portal-link" onclick="salirAlUniverso(event)">
+      Ingresar al Universo MPA →
+    </a>
+  </div>
+
+</div>
+
+<script>
+// AUTOPLAY ON FIRST INTERACTION
+let audioUnlocked = false;
+document.addEventListener('click', ()=>{
+  if(audioUnlocked) return;
+  audioUnlocked = true;
+  // si el lema ya fue revelado, arranca la música
+  const iframe = document.getElementById('spotify-final');
+  if(iframe && document.getElementById('lema-section').classList.contains('revealed')){
+    iframe.src = iframe.src; // reload fuerza autoplay
+  }
+}, {once: false});
+
+// COSMOS
+const canvas=document.getElementById('cosmos'),ctx=canvas.getContext('2d');
+let W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+function rand(a,b){return Math.random()*(b-a)+a;}
+
+// bgPhase definido PRIMERO para que las clases lo usen
+let bgPhase=0;
+
+// ─── FONDO ACUMULATIVO ───────────────────────────────────────────
+// Capas de luz que se van sumando y QUEDAN
+const bgLayers = [
+  // EVIGELA — dorado abajo izquierda
+  { color:'201,168,76', x:0.1,  y:1.2, r:1.2, alpha:0, targetAlpha:0 },
+  // EVIGELA — dorado abajo derecha
+  { color:'220,180,60', x:0.9,  y:1.2, r:1.0, alpha:0, targetAlpha:0 },
+  // LUDE — bronce abajo centro
+  { color:'160,110,50', x:0.5,  y:1.1, r:1.3, alpha:0, targetAlpha:0 },
+  // LUDE — bronce lateral izquierda
+  { color:'139,99,64',  x:0.05, y:0.6, r:0.9, alpha:0, targetAlpha:0 },
+  // TRANSMUTA — violeta centro arriba
+  { color:'123,47,190', x:0.5,  y:0.2, r:1.4, alpha:0, targetAlpha:0 },
+  // TRANSMUTA — violeta lateral derecha
+  { color:'160,60,240', x:0.95, y:0.5, r:0.9, alpha:0, targetAlpha:0 },
+  // violeta sutil SIEMPRE — el Arca siempre destella
+  { color:'100,30,160', x:0.5,  y:0.0, r:0.8, alpha:0.06, targetAlpha:0.06 },
+  // fucsia siempre
+  { color:'227,54,195', x:0.95, y:0.05, r:0.6, alpha:0.05, targetAlpha:0.05 },
+];
+
+function drawBgLayers(){
+  bgLayers.forEach(l=>{
+    if(Math.abs(l.alpha - l.targetAlpha) > 0.0005){
+      l.alpha += (l.targetAlpha - l.alpha) * 0.025; // más rápido
+    }
+    if(l.alpha < 0.002) return;
+    const gx = l.x * W, gy = l.y * H, gr = l.r * Math.max(W,H);
+    const g = ctx.createRadialGradient(gx,gy,0,gx,gy,gr);
+    g.addColorStop(0,   `rgba(${l.color},${l.alpha})`);
+    g.addColorStop(0.4, `rgba(${l.color},${l.alpha*0.5})`);
+    g.addColorStop(1,   `rgba(${l.color},0)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+  });
+}
+
+// Niebla
+class Niebla {
+  constructor(){this.reset();}
+  reset(){
+    this.x=rand(-200,W+200);
+    this.y=rand(H*.3,H);
+    this.w=rand(300,700);
+    this.h=rand(60,180);
+    this.alpha=rand(.02,.08);
+    this.vx=rand(-.3,.3);
+    this.vy=rand(-.08,.08);
+    this.life=0;
+    this.maxLife=rand(400,900);
+  }
+  update(){this.x+=this.vx;this.y+=this.vy;this.life++;if(this.life>this.maxLife)this.reset();}
+  draw(){
+    const a=this.alpha*Math.sin(Math.PI*this.life/this.maxLife);
+    const g=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.w*.5);
+    // color de niebla cambia con la fase
+    const col = bgPhase===0 ? `rgba(13,6,24,${a*2})` :
+                bgPhase===1 ? `rgba(61,26,110,${a})` :
+                bgPhase===2 ? `rgba(100,70,20,${a*.7})` :
+                              `rgba(80,20,80,${a*.8})`;
+    g.addColorStop(0,col);
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.save();
+    ctx.fillStyle=g;
+    ctx.beginPath();
+    ctx.ellipse(this.x,this.y,this.w*.5,this.h*.5,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// Partículas
+class Particula {
+  constructor(){this.reset(true);}
+  reset(init){
+    this.x=rand(0,W);
+    this.y=init?rand(0,H):H+10;
+    this.vx=rand(-.15,.15);
+    this.vy=rand(-.5,-.1);
+    this.sz=rand(.5,2.5);
+    this.alpha=rand(.1,.6);
+    this.life=0;
+    this.maxLife=rand(180,550);
+    // color según fase
+    const r=Math.random();
+    if(bgPhase===0) this.c=r>.7?'#967B45':'#3d1a6e';
+    else if(bgPhase===1) this.c=r>.5?'#E336C3':'#967B45';
+    else if(bgPhase===2) this.c=r>.4?'#e8d5a3':'#E336C3';
+    else this.c=r>.3?'#E336C3':r>.6?'#967B45':'#e8d5a3';
+  }
+  update(){this.x+=this.vx;this.y+=this.vy;this.life++;if(this.life>this.maxLife||this.y<-10)this.reset(false);}
+  draw(){
+    ctx.save();
+    ctx.globalAlpha=this.alpha*Math.sin(Math.PI*this.life/this.maxLife);
+    ctx.fillStyle=this.c;
+    ctx.beginPath();ctx.arc(this.x,this.y,this.sz,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  }
+}
+
+// Destellos esporádicos
+class Destello {
+  constructor(){this.reset();}
+  reset(){
+    this.x=rand(0,W);this.y=rand(0,H*.7);
+    this.alpha=0;this.maxAlpha=rand(.15,.5);
+    this.growing=true;this.speed=rand(.01,.04);
+    this.size=rand(1,4);
+    this.c=Math.random()>.5?'#967B45':'#E336C3';
+    this.wait=rand(60,300);this.waited=0;
+  }
+  update(){
+    if(this.waited<this.wait){this.waited++;return;}
+    if(this.growing){this.alpha+=this.speed;if(this.alpha>=this.maxAlpha)this.growing=false;}
+    else{this.alpha-=this.speed*.5;if(this.alpha<=0)this.reset();}
+  }
+  draw(){
+    if(this.waited<this.wait)return;
+    ctx.save();ctx.globalAlpha=this.alpha;ctx.fillStyle=this.c;
+    ctx.shadowBlur=12;ctx.shadowColor=this.c;
+    ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  }
+}
+
+// ─── RAYOS VIOLETAS — desde el inicio, se intensifican ───────────
+const rayosVioleta=[];
+class RayoVioleta {
+  constructor(init){this.reset(init);}
+  reset(init){
+    // salen desde abajo — como el Arca pulsando
+    this.x=rand(W*.2,W*.8);
+    this.y=H+rand(0,50);
+    this.w=rand(1,3);
+    this.h=rand(H*.4,H*.9);
+    this.alpha=0;
+    this.maxAlpha=rand(.03,.09);
+    this.speed=rand(.002,.006);
+    this.growing=true;
+    this.delay=rand(0,init?300:80);
+    this.waited=0;
+    this.intensidad=1; // se multiplica con cada fase
+  }
+  update(){
+    if(this.waited<this.delay){this.waited++;return;}
+    const spd=this.speed*this.intensidad;
+    if(this.growing){this.alpha+=spd;if(this.alpha>=this.maxAlpha*this.intensidad)this.growing=false;}
+    else{this.alpha-=spd*.25;if(this.alpha<=0)this.reset(false);}
+  }
+  draw(){
+    if(this.waited<this.delay)return;
+    ctx.save();
+    ctx.globalAlpha=Math.min(this.alpha,0.9);
+    const g=ctx.createLinearGradient(this.x,this.y,this.x,this.y-this.h);
+    g.addColorStop(0,'rgba(123,47,190,0)');
+    g.addColorStop(0.2,`rgba(160,60,240,${this.alpha*6})`);
+    g.addColorStop(0.6,`rgba(200,120,255,${this.alpha*4})`);
+    g.addColorStop(1,'rgba(123,47,190,0)');
+    ctx.fillStyle=g;
+    ctx.shadowBlur=20;ctx.shadowColor='rgba(160,60,240,0.6)';
+    ctx.fillRect(this.x-this.w/2,this.y-this.h,this.w,this.h);
+    ctx.restore();
+  }
+}
+// activos desde el inicio — pocos, sutiles
+for(let i=0;i<8;i++) rayosVioleta.push(new RayoVioleta(true));
+
+// ─── RAYOS DE LUZ — EVIGELA ──────────────────────────────────────
+const rayos=[];
+let rayosActivos=false;
+class Rayo {
+  constructor(){this.reset();}
+  reset(){
+    this.x=rand(0,W);
+    this.y=-50;
+    this.w=rand(1,4);
+    this.h=rand(H*.3,H*.8);
+    this.alpha=0;
+    this.maxAlpha=rand(.04,.12);
+    this.speed=rand(.003,.008);
+    this.growing=true;
+    this.delay=rand(0,200);
+    this.waited=0;
+  }
+  update(){
+    if(this.waited<this.delay){this.waited++;return;}
+    if(this.growing){this.alpha+=this.speed;if(this.alpha>=this.maxAlpha)this.growing=false;}
+    else{this.alpha-=this.speed*.3;if(this.alpha<=0)this.reset();}
+  }
+  draw(){
+    if(this.waited<this.delay)return;
+    ctx.save();
+    ctx.globalAlpha=this.alpha;
+    const g=ctx.createLinearGradient(this.x,this.y,this.x,this.y+this.h);
+    g.addColorStop(0,'rgba(201,168,76,0)');
+    g.addColorStop(0.3,`rgba(230,200,100,${this.alpha*8})`);
+    g.addColorStop(1,'rgba(201,168,76,0)');
+    ctx.fillStyle=g;
+    ctx.fillRect(this.x-this.w/2,this.y,this.w,this.h);
+    ctx.restore();
+  }
+}
+for(let i=0;i<18;i++) rayos.push(new Rayo());
+
+// ─── SÍMBOLOS FLOTANTES — LUDE ────────────────────────────────────
+const simbolos=[];
+let simbolosActivos=false;
+// símbolos de juego: dados, cartas, runas, fichas, estrellas
+const GLYPHS=[
+  '⚄','⚅','⚂','⚃','⚁','⚀',   // dados
+  '♠','♣','♥','♦',              // cartas
+  'ᚱ','ᚦ','ᚷ','ᚹ','ᚾ','ᛁ',    // runas
+  '⬡','◎','△','✧','⟡','✺',    // símbolos mágicos
+  '🎲','🃏','⚡','🌀',           // extras
+];
+class Simbolo {
+  constructor(){this.reset(true);}
+  reset(init){
+    this.x=rand(-40,W+40);
+    this.y=init?rand(0,H):rand(H+20,H+120);
+    this.glyph=GLYPHS[Math.floor(rand(0,GLYPHS.length))];
+    this.size=rand(16,38);
+    this.vx=rand(-.5,.5);
+    this.vy=rand(-.7,-.2);
+    this.rot=rand(0,Math.PI*2);
+    this.rotSpeed=rand(-.025,.025);
+    this.alpha=rand(.25,.7);
+    this.life=0;
+    this.maxLife=rand(250,700);
+    const r=Math.random();
+    this.c=r>.6?'#8B6340':r>.3?'#C9A84C':'#c49a6c';
+  }
+  update(){
+    this.x+=this.vx;this.y+=this.vy;
+    this.rot+=this.rotSpeed;
+    this.life++;
+    if(this.life>this.maxLife||this.y<-60)this.reset(false);
+  }
+  draw(){
+    const a=this.alpha*Math.sin(Math.PI*this.life/this.maxLife);
+    ctx.save();
+    ctx.globalAlpha=a;
+    ctx.fillStyle=this.c;
+    ctx.shadowBlur=14;ctx.shadowColor=this.c;
+    ctx.font=`${this.size}px serif`;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.translate(this.x,this.y);
+    ctx.rotate(this.rot);
+    ctx.fillText(this.glyph,0,0);
+    ctx.restore();
+  }
+}
+for(let i=0;i<70;i++) simbolos.push(new Simbolo());
+
+// ─── APERTURA CÓSMICA — TRANSMUTA ────────────────────────────────
+let portaActivo=false;
+let portaAlpha=0;
+let portaTargetAlpha=0;
+let portaR=0;
+let portaMaxR=0;
+
+function drawPortal(){
+  if(portaAlpha<0.002) return;
+  portaR+=(portaMaxR-portaR)*0.015;
+  portaAlpha+=(portaTargetAlpha-portaAlpha)*0.008;
+
+  const cx=W/2, cy=H/2;
+  ctx.save();
+
+  // anillo exterior giratorio
+  for(let ring=0;ring<3;ring++){
+    const r=portaR*(0.5+ring*0.3);
+    const g=ctx.createRadialGradient(cx,cy,r*.85,cx,cy,r);
+    g.addColorStop(0,'rgba(123,47,190,0)');
+    g.addColorStop(0.7,`rgba(160,60,240,${portaAlpha*(0.4-ring*.1)})`);
+    g.addColorStop(1,'rgba(123,47,190,0)');
+    ctx.fillStyle=g;
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+  }
+
+  // destello central
+  const gCenter=ctx.createRadialGradient(cx,cy,0,cx,cy,portaR*.4);
+  gCenter.addColorStop(0,`rgba(255,240,200,${portaAlpha*.6})`);
+  gCenter.addColorStop(0.4,`rgba(180,80,255,${portaAlpha*.3})`);
+  gCenter.addColorStop(1,'rgba(123,47,190,0)');
+  ctx.fillStyle=gCenter;
+  ctx.beginPath();ctx.arc(cx,cy,portaR*.4,0,Math.PI*2);ctx.fill();
+
+  ctx.restore();
+}
+
+// Líneas de constelación
+const lns=[];
+for(let i=0;i<12;i++) lns.push({x1:rand(0,W),y1:rand(0,H),x2:rand(0,W),y2:rand(0,H),vx1:rand(-.05,.05),vy1:rand(-.04,.04),vx2:rand(-.05,.05),vy2:rand(-.04,.04),a:rand(.015,.05)});
+
+const nieblas=[]; for(let i=0;i<12;i++) nieblas.push(new Niebla());
+const pts=[]; for(let i=0;i<100;i++) pts.push(new Particula());
+const destellos=[]; for(let i=0;i<25;i++) destellos.push(new Destello());
+
+// Colores de transición por fase
+const bgColors=[
+  {r:13,g:6,b:24},
+  {r:18,g:8,b:35},
+  {r:20,g:10,b:28},
+  {r:22,g:8,b:30},
+];
+let currentBgColor={...bgColors[0]};
+let targetBgColor={...bgColors[0]};
+let bgT=1;
+
+function anim(){
+  ctx.fillStyle=`rgb(13,6,24)`;
+  ctx.fillRect(0,0,W,H);
+
+  drawBgLayers();
+
+  // portal cósmico — TRANSMUTA
+  drawPortal();
+
+  const vg=ctx.createRadialGradient(W/2,H/2,H*.05,W/2,H/2,H*.95);
+  vg.addColorStop(0,'rgba(0,0,0,0)');
+  vg.addColorStop(1,'rgba(5,0,12,.75)');
+  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+
+  // niebla
+  nieblas.forEach(n=>{n.update();n.draw();});
+
+  // rayos violeta — SIEMPRE, desde el inicio
+  rayosVioleta.forEach(r=>{r.update();r.draw();});
+
+  // rayos de luz — EVIGELA
+  if(rayosActivos) rayos.forEach(r=>{r.update();r.draw();});
+
+  // líneas
+  lns.forEach(l=>{
+    l.x1+=l.vx1;l.y1+=l.vy1;l.x2+=l.vx2;l.y2+=l.vy2;
+    if(l.x1<0||l.x1>W)l.vx1*=-1;if(l.y1<0||l.y1>H)l.vy1*=-1;
+    if(l.x2<0||l.x2>W)l.vx2*=-1;if(l.y2<0||l.y2>H)l.vy2*=-1;
+    ctx.save();ctx.globalAlpha=l.a;ctx.strokeStyle='#967B45';ctx.lineWidth=.4;
+    ctx.beginPath();ctx.moveTo(l.x1,l.y1);ctx.lineTo(l.x2,l.y2);ctx.stroke();ctx.restore();
+  });
+
+  // símbolos flotantes — LUDE
+  if(simbolosActivos) simbolos.forEach(s=>{s.update();s.draw();});
+
+  // destellos
+  destellos.forEach(d=>{d.update();d.draw();});
+
+  // partículas
+  pts.forEach(p=>{p.update();p.draw();});
+
+  requestAnimationFrame(anim);
+}
+anim();
+
+// ─── RIPPLE CANVAS ───────────────────────────────────────────────
+const rc=document.getElementById('ripple-canvas'),rctx=rc.getContext('2d');
+rc.width=window.innerWidth;rc.height=window.innerHeight;
+window.addEventListener('resize',()=>{rc.width=window.innerWidth;rc.height=window.innerHeight;});
+
+const ripples=[];
+function addRipple(color, intensity=1){
+  const cx=window.innerWidth/2, cy=window.innerHeight/2;
+  for(let i=0;i<3;i++){
+    ripples.push({
+      x:cx,y:cy,r:0,
+      maxR:Math.hypot(cx,cy)*1.6,
+      color,
+      alpha:0.35*intensity,
+      speed:6+i*4,
+      delay:i*18
+    });
+  }
+}
+function animRipple(){
+  rctx.clearRect(0,0,rc.width,rc.height);
+  ripples.forEach((r,i)=>{
+    if(r.delay>0){r.delay--;return;}
+    r.r+=r.speed;
+    r.alpha*=0.97;
+    if(r.alpha<0.003){ripples.splice(i,1);return;}
+    rctx.save();
+    rctx.strokeStyle=r.color;
+    rctx.lineWidth=3;
+    rctx.globalAlpha=r.alpha;
+    rctx.shadowBlur=20;
+    rctx.shadowColor=r.color;
+    rctx.beginPath();
+    rctx.arc(r.x,r.y,r.r,0,Math.PI*2);
+    rctx.stroke();
+    rctx.restore();
+  });
+  requestAnimationFrame(animRipple);
+}
+animRipple();
+
+// ─── TRANSICIÓN DRAMÁTICA ─────────────────────────────────────────
+const overlay=document.getElementById('transition-overlay');
+const phaseColors=['#C9A84C','#8B6340','#7B2FBE','#E336C3'];
+const phaseBg=[
+  'radial-gradient(circle at 30% 100%, rgba(201,168,76,.15) 0%, transparent 60%)',
+  'radial-gradient(circle at 70% 100%, rgba(139,99,64,.2) 0%, transparent 60%), radial-gradient(circle at 30% 100%, rgba(201,168,76,.1) 0%, transparent 50%)',
+  'radial-gradient(circle at center, rgba(123,47,190,.2) 0%, transparent 60%), radial-gradient(circle at 70% 100%, rgba(139,99,64,.15) 0%, transparent 50%)',
+  'radial-gradient(circle at center, rgba(227,54,195,.3) 0%, rgba(123,47,190,.2) 40%, transparent 70%)',
+];
+
+function avanzarFondo(fase){
+  bgPhase=fase;
+  const col=phaseColors[fase-1];
+
+  if(fase===1){
+    bgLayers[0].targetAlpha=0.55;
+    bgLayers[1].targetAlpha=0.45;
+    rayosActivos=true;
+    rayos.forEach(r=>r.reset());
+    // violeta un poco más fuerte
+    rayosVioleta.forEach(r=>r.intensidad=1.8);
+  }
+  if(fase===2){
+    bgLayers[0].targetAlpha=0.35;
+    bgLayers[1].targetAlpha=0.30;
+    bgLayers[2].targetAlpha=0.55;
+    bgLayers[3].targetAlpha=0.40;
+    simbolosActivos=true;
+    simbolos.forEach(s=>s.reset(false));
+    // violeta más intenso + más rayos
+    rayosVioleta.forEach(r=>r.intensidad=3);
+    for(let i=0;i<8;i++) rayosVioleta.push(new RayoVioleta(false));
+  }
+  if(fase===3){
+    bgLayers[0].targetAlpha=0.20;
+    bgLayers[1].targetAlpha=0.18;
+    bgLayers[2].targetAlpha=0.30;
+    bgLayers[3].targetAlpha=0.25;
+    bgLayers[4].targetAlpha=0.60;
+    bgLayers[5].targetAlpha=0.50;
+    bgLayers[6].targetAlpha=0.30;
+    bgLayers[7].targetAlpha=0.18;
+    // violeta explota — muchos más rayos
+    rayosVioleta.forEach(r=>r.intensidad=5);
+    for(let i=0;i<16;i++) rayosVioleta.push(new RayoVioleta(false));
+    portaActivo=true;
+    portaTargetAlpha=0.7;
+    portaMaxR=Math.min(W,H)*0.45;
+    portaR=20;
+  }
+
+  // ondas — más cantidad, más intensidad
+  addRipple(col, 2.0);
+  addRipple(col, 1.5);
+
+  // flash overlay — entra fuerte y se va despacio
+  overlay.style.background=`radial-gradient(circle at center, ${col} 0%, rgba(13,6,24,0.95) 60%)`;
+  overlay.style.transition='opacity 0.08s ease';
+  overlay.style.opacity='0.75';
+  setTimeout(()=>{
+    overlay.style.transition='opacity 2.5s ease';
+    overlay.style.opacity='0';
+  },80);
+
+  // partículas se renuevan con más energía
+  pts.forEach(p=>p.reset(false));
+}
+
+function salirAlUniverso(e){
+  e.preventDefault();
+  const url=e.currentTarget.href;
+
+  // Transición épica de salida
+  addRipple('#E336C3', 2);
+  addRipple('#C9A84C', 1.5);
+  addRipple('#7B2FBE', 1.8);
+
+  overlay.style.background='radial-gradient(circle at center, #e8d5a3 0%, #E336C3 30%, #7B2FBE 60%, #0d0618 100%)';
+  overlay.style.transition='opacity 0.1s ease';
+  overlay.style.opacity='0.1';
+
+  setTimeout(()=>{
+    overlay.style.transition='opacity 1.5s ease';
+    overlay.style.opacity='1';
+  },50);
+
+  setTimeout(()=>{
+    window.location.href=url;
+  },1700);
+}
+
+// ANSWERS
+const ANSWERS=['EVIGELA','LUDE','TRANSMUTA'];
+const solved=[false,false,false];
+let arcaDone=false;
+
+document.querySelectorAll('.answer-input').forEach((el,i)=>{
+  el.addEventListener('keydown',e=>{if(e.key==='Enter')check(i);});
+});
+
+function check(i){
+  const inp=document.getElementById('inp-'+i);
+  const fb=document.getElementById('fb-'+i);
+  const val=inp.value.trim().toUpperCase();
+  const err=['El espejo no aplaude intentos. Mirá otra vez.','La palabra no está en el poema. Está en su esqueleto.','Eso hizo ruido. Pero no quedó.'];
+  const ok=['✦ El reflejo cedió. Primera marca activada.','✦ La arquitectura respondió. Segunda marca activada.','✦ La palabra quedó. Tercera marca activada.'];
+  if(val===ANSWERS[i]){
+    inp.classList.remove('wrong');inp.classList.add('correct');inp.disabled=true;
+    fb.textContent=ok[i];fb.className='fb ok';
+    solved[i]=true;
+    document.getElementById('ch-'+i).classList.add('solved');
+    document.getElementById('badge-'+i).style.display='inline-block';
+    document.getElementById('pip-'+i).classList.add('done');
+    document.getElementById('rev-'+i).classList.add('show');
+    setTimeout(()=>unlockNext(i),1400);
+  } else {
+    inp.classList.remove('correct');inp.classList.add('wrong');
+    fb.textContent='✦ '+err[i];fb.className='fb err';
+    setTimeout(()=>inp.classList.remove('wrong'),500);
+  }
+}
+
+function unlockNext(i){
+  if(i===0){
+    avanzarFondo(1);
+    const w=document.getElementById('wrap-1');
+    w.classList.add('open');
+    setTimeout(()=>w.scrollIntoView({behavior:'smooth',block:'start'}),200);
+  }
+  if(i===1){
+    avanzarFondo(2);
+    const w=document.getElementById('wrap-2');
+    w.classList.add('open');
+    setTimeout(()=>w.scrollIntoView({behavior:'smooth',block:'start'}),200);
+  }
+  if(i===2){
+    avanzarFondo(3);
+    setTimeout(revealLema,600);
+  }
+}
+
+function foundArca(){
+  if(arcaDone)return;
+  arcaDone=true;
+  document.getElementById('arca-zone').style.pointerEvents='none';
+
+  // calcular centro del Arca en pantalla
+  const img=document.querySelector('.wally-wrap img');
+  const rect=img.getBoundingClientRect();
+  const ax=rect.left + rect.width*0.14;
+  const ay=rect.top  + rect.height*0.70;
+
+  // ondas desde el Arca
+  for(let i=0;i<6;i++){
+    ripples.push({
+      x:ax, y:ay, r:0,
+      maxR:Math.max(window.innerWidth,window.innerHeight)*1.5,
+      color: i<3 ? '#b07fe0' : '#E336C3',
+      alpha:0.5-i*0.05, speed:5+i*3, delay:i*20
+    });
+  }
+
+  // flash overlay desde el Arca
+  const px=Math.round(ax/window.innerWidth*100);
+  const py=Math.round(ay/window.innerHeight*100);
+  overlay.style.background=`radial-gradient(circle at ${px}% ${py}%, #b07fe0 0%, rgba(13,6,24,0.95) 55%)`;
+  overlay.style.transition='opacity 0.06s ease';
+  overlay.style.opacity='0.65';
+  setTimeout(()=>{ overlay.style.transition='opacity 2.5s ease'; overlay.style.opacity='0'; },60);
+
+  // rayos violeta se intensifican
+  rayosVioleta.forEach(r=>r.intensidad=3);
+  for(let i=0;i<8;i++) rayosVioleta.push(new RayoVioleta(false));
+
+  // mostrar Arca encendida y poema
+  document.getElementById('arca-msg').classList.add('show');
+  setTimeout(()=>{
+    const pw=document.getElementById('poem-wrap');
+    pw.style.display='block';
+    pw.style.animation='fadeUp .9s ease forwards';
+    setTimeout(()=>pw.scrollIntoView({behavior:'smooth',block:'start'}),300);
+  },1400);
+}
+
+function mostrarPista(){
+  document.getElementById('pista-1').style.display='block';
+  document.getElementById('pista-1').style.animation='fadeUp .6s ease forwards';
+}
+function mostrarPista2(){
+  document.getElementById('pista-2').style.display='block';
+  document.getElementById('pista-2').style.animation='fadeUp .6s ease forwards';
+  setTimeout(()=>document.getElementById('pista-2').scrollIntoView({behavior:'smooth',block:'start'}),200);
+}
+function mostrarPista3(){
+  document.getElementById('pista-3').style.display='block';
+  document.getElementById('pista-3').style.animation='fadeUp .6s ease forwards';
+  setTimeout(()=>document.getElementById('pista-3').scrollIntoView({behavior:'smooth',block:'start'}),200);
+}
+function elegirRespuesta(el, correcta){
+  document.querySelectorAll('#pista-3 .opcion-btn').forEach(b=>b.classList.remove('elegida'));
+  el.classList.add('elegida');
+  const fb = document.getElementById('fb-eleccion');
+  if(correcta){
+    fb.textContent='✦ Esa es. Confirmando...';
+    fb.style.color='#4caf89';
+    // pequeña pausa dramática antes de resolver
+    setTimeout(()=>{
+      const inp = document.getElementById('inp-0');
+      inp.value='EVIGELA';
+      inp.disabled=false;
+      check(0);
+    }, 600);
+  } else {
+    fb.textContent='✦ Esa no es. Escuchá lo que dice el universo.';
+    fb.style.color='#e57373';
+    el.style.opacity='.4';
+    el.style.pointerEvents='none';
+  }
+}
+
+function elegida(el){
+  document.querySelectorAll('.opcion-btn').forEach(b=>b.classList.remove('elegida'));
+  el.classList.add('elegida');
+  const post=document.getElementById('post-eleccion');
+  post.style.display='block';
+  post.style.animation='fadeUp .6s ease forwards';
+}
+
+function toggleHint(id){document.getElementById(id).classList.toggle('open');}
+
+function revealLema(){
+  const s=document.getElementById('lema-section');
+  s.classList.add('revealed');
+  s.scrollIntoView({behavior:'smooth',block:'center'});
+  ['lw-0','lw-1','lw-2'].forEach((id,i)=>{
+    setTimeout(()=>document.getElementById(id).classList.add('show'),i*350);
+  });
+  // arrancar música — funciona si el usuario ya interactuó con la página
+  setTimeout(()=>{
+    const iframe=document.getElementById('spotify-final');
+    if(iframe){
+      iframe.src='https://open.spotify.com/embed/track/5Otw3CJ2Hd4cA3aFVK1S7n?utm_source=generator&theme=0&autoplay=1';
+    }
+  }, 1200);
+}
+</script>
+</body>
+</html>
