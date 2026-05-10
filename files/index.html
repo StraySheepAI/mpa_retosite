@@ -213,8 +213,14 @@
       No todo el que responde entiende.
     </div>
     <div class="header-intro-sub">
-      Este no es un formulario.<br>
-      Es una prueba de lectura.
+      <div style="margin:20px 0;text-align:center;">
+        <iframe width="100%" height="315"
+          src="https://www.youtube.com/embed/SRw9lmGa3dA"
+          style="border-radius:14px;border:1px solid rgba(201,168,76,.2);max-width:560px;display:block;margin:0 auto;"
+          frameborder="0"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          allowfullscreen loading="lazy"></iframe>
+      </div>
     </div>
   </header>
 
@@ -310,9 +316,12 @@
       Sin darte cuenta, ya empezaste a despertar.</p>
 
       <div style="margin-top:28px;text-align:center;">
-        <video controls style="width:100%;max-width:560px;border-radius:14px;border:1px solid rgba(201,168,76,.2);">
-          <source src="Evi_gila_presentacio_n_.mp4" type="video/mp4">
-        </video>
+        <iframe width="100%" height="315"
+          src="https://www.youtube.com/embed/JkAMO3Xfe3A"
+          style="border-radius:14px;border:1px solid rgba(201,168,76,.2);max-width:560px;display:block;margin:0 auto;"
+          frameborder="0"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          allowfullscreen loading="lazy"></iframe>
       </div>
 
       <div style="margin-top:24px;background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.15);border-radius:14px;padding:20px 24px;">
@@ -339,17 +348,19 @@
 
         <div id="poem-wrap">
           <div style="margin-bottom:24px;text-align:center;">
-            <video controls style="width:100%;max-width:560px;border-radius:14px;border:1px solid rgba(139,99,64,.25);">
-              <source src="MPADesafio_2.mp4" type="video/mp4">
-            </video>
+            <iframe width="100%" height="315"
+              src="https://www.youtube.com/embed/kfbya1DPTSA"
+              style="border-radius:14px;border:1px solid rgba(139,99,64,.25);max-width:560px;display:block;margin:0 auto;"
+              frameborder="0"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              allowfullscreen loading="lazy"></iframe>
           </div>
           <div class="sep"><span>✦ el segundo concepto ✦</span></div>
 
           <p style="font-size:15px;color:var(--text);line-height:1.95;margin-bottom:20px;">
-            Felicitaciones. Has superado el desafío del despertar.<br>
-            Has encontrado el Arca Potentia.<br><br>
-            Pero Evigila no es solo ver.<br>
-            <strong style="color:var(--gold-light)">La verdad no basta si no actuás.</strong>
+            El segundo concepto de poder está oculto en lo que estás a punto de ver.<br><br>
+            Prestá atención. No todo lo que se dice está en las palabras.<br>
+            <strong style="color:var(--gold-light)">Algunos mensajes se leen entre líneas.</strong>
           </p>
 
           <div class="sep"><span>✦ escucha bien ✦</span></div>
@@ -378,25 +389,36 @@
 
           <div class="sep"><span>✦ ¿cuál es el segundo concepto de poder? ✦</span></div>
 
-          <span class="hint-tog" onclick="toggleHint('h1a')">→ una pista</span>
+          <div class="input-row">
+            <input class="answer-input" id="inp-1" type="text"
+              placeholder="el concepto que encontraste..."
+              autocomplete="off" spellcheck="false"
+              style="border-color:rgba(139,99,64,.5);color:#967B45;"/>
+            <button class="btn-go" onclick="check(1)" style="border-color:rgba(139,99,64,.5);color:#967B45;">→</button>
+          </div>
+          <div class="fb" id="fb-1"></div>
+
+          <span class="hint-tog" id="tog-h1a" onclick="showNextHint('h1a', 'tog-h1b')" style="margin-top:14px;">→ una pista</span>
           <div class="hint-box" id="h1a">
             Lo hacen los niños sin que nadie se los enseñe.<br>
             Lo olvidan los adultos sin que nadie se los diga.<br>
             No es serio. O sí lo es — depende de quién lo hace.
           </div>
-          <span class="hint-tog" onclick="toggleHint('h1b')" style="margin-top:10px;">→ otra pista</span>
+          <span class="hint-tog" id="tog-h1b" onclick="showNextHint('h1b', 'tog-h1c')" style="margin-top:10px;display:none;">→ otra pista</span>
           <div class="hint-box" id="h1b">
             El poema tiene cuatro líneas.<br>
             Cada una empieza con algo.<br>
             No lo leas. Miralo.
           </div>
-
-          <div id="opciones-lude" style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
-            <button class="opcion-btn" onclick="elegirLude(this, false)">✦ ARCANA</button>
-            <button class="opcion-btn" onclick="elegirLude(this, true)">✦ LUDE</button>
-            <button class="opcion-btn" onclick="elegirLude(this, false)">✦ VIGIL</button>
+          <span class="hint-tog" id="tog-h1c" onclick="showNextHint('h1c', null)" style="margin-top:10px;display:none;">→ no lo encuentro</span>
+          <div class="hint-box" id="h1c">
+            <p style="margin-bottom:12px;font-size:13px;">Elegí cuál creés que es:</p>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <button class="opcion-btn" onclick="elegirLude(this, false)">✦ ARCANA</button>
+              <button class="opcion-btn" onclick="elegirLude(this, true)">✦ LUDE</button>
+              <button class="opcion-btn" onclick="elegirLude(this, false)">✦ VIGIL</button>
+            </div>
           </div>
-          <div class="fb" id="fb-1"></div>
 
           <div class="rev" id="rev-1">
             <div class="rev-word">LUDE — Juega.</div>
@@ -1188,6 +1210,8 @@ const ANSWERS=['EVIGILA','LUDE','TRANSMUTA'];
       btn.classList.add('elegida');
       fb.textContent = '';
       fb.className = 'fb ok';
+      const inp1 = document.getElementById('inp-1');
+      if (inp1) { inp1.disabled = true; inp1.classList.add('correct'); }
       const rev = document.getElementById('rev-1');
       rev.classList.add('show');
       setTimeout(() => {
@@ -1344,6 +1368,15 @@ function elegida(el){
   const post=document.getElementById('post-eleccion');
   post.style.display='block';
   post.style.animation='fadeUp .6s ease forwards';
+}
+
+function showNextHint(boxId, nextTogId) {
+  const box = document.getElementById(boxId);
+  box.classList.toggle('open');
+  if (box.classList.contains('open') && nextTogId) {
+    const nextTog = document.getElementById(nextTogId);
+    if (nextTog) nextTog.style.display = 'inline-block';
+  }
 }
 
 function toggleHint(id){document.getElementById(id).classList.toggle('open');}
